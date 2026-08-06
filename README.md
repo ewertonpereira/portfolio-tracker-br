@@ -1,14 +1,13 @@
 # 📈 Portfolio Tracker BR
 
-A Python API that fetches real-time stock prices from B3 
-and calculates the total value of your portfolio.
+A REST API built with FastAPI that fetches real-time stock prices 
+from B3 and manages your investment portfolio.
 
 ## 🚀 Features
-- REST API built with FastAPI
+- Full CRUD REST API with FastAPI
 - Real-time stock prices via brapi.dev
-- Get full portfolio or individual stock data
-- Reads portfolio from CSV file
 - Secure token handling with environment variables
+- Portfolio data stored in CSV
 
 ## 🛠️ Technologies
 - Python 3
@@ -27,7 +26,7 @@ and calculates the total value of your portfolio.
    TOKEN=your_brapi_token_here
 
 4. Edit `wallet.csv` with your stocks:
-   ticker,quantidade
+   ticker,amount
    PETR4,10
    ITUB4,8
 
@@ -36,17 +35,23 @@ and calculates the total value of your portfolio.
 
 ## 📡 Endpoints
 
-GET /portfolio
-→ Returns all stocks and total portfolio value
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /portfolio | Returns all stocks and total value |
+| GET | /portfolio/{ticker} | Returns a specific stock |
+| POST | /portfolio | Adds a new stock |
+| PUT | /portfolio/{ticker} | Updates stock amount |
+| DELETE | /portfolio/{ticker} | Removes a stock |
 
-GET /portfolio/{ticker}
-→ Returns data for a specific stock
-→ Example: /portfolio/PETR4
-
-## 📊 Example response
+## 📊 Example response — GET /portfolio
 {
   "portfolio": [
-    {"ticker": "PETR4", "quantidade": 10, "preco": 37.64, "valor_total": 376.40}
+    {
+      "ticker": "PETR4",
+      "amount": 10,
+      "price": 37.64,
+      "total_value": 376.40
+    }
   ],
-  "total": 4979.81
+  "total": 376.40
 }

@@ -13,16 +13,8 @@ class Stock(BaseModel):
     ticker: str
     amount: int
 
-@app.post('/portfolio')
-def add_stock(stock: Stock):
-    wallet = load_wallet('wallet.csv')
-    if stock.ticker in wallet:
-        return {'error':f'{stock.ticker} já existe na carteira.'}
-
-    wallet[stock.ticker] = stock.amount
-    save_wallet(wallet, 'wallet.csv')
-
-    return {'message': f'{stock.ticker} adicionado com sucesso!'}
+class StockUpdate(BaseModel):
+    amount: int
 
 @app.get('/portfolio')
 def get_portfolio():
@@ -48,6 +40,17 @@ def get_portfolio():
         'portfolio': result,
         'total': round(total, 2)
     }
+
+@app.post('/portfolio')
+def add_stock(stock: Stock):
+    wallet = load_wallet('wallet.csv')
+    if stock.ticker in wallet:
+        return {'error':f'{stock.ticker} já existe na carteira.'}
+
+    wallet[stock.ticker] = stock.amount
+    save_wallet(wallet, 'wallet.csv')
+
+    return {'message': f'{stock.ticker} adicionado com sucesso!'}
 
 @app.get('/portfolio/{ticker}')
 def get_stock(ticker:str):
@@ -77,4 +80,19 @@ def remove_stock(ticker:str):
 
     del wallet[ticker]
     save_wallet(wallet, 'wallet.csv')
-    return {'message': f'{ticker} removido com sucesso!'} 
+    return {'message': f'{ticker} removido com sucesso!'}
+
+@app.put('/portfolio/{ticker}')
+def update_stock(ticker:str, stock: StockUpdate):
+    wallet = load_wallet('wallet.csv')
+
+    if ticker not in wallet:
+        return {"error": f"{ticker} não encontrado na carteira."}
+
+    wallet[ticker] = stock.amount
+    save_wallet(wallet, 'wallet.csv')
+
+    return {
+        "message": f"{ticker} atualizado com sucesso!",
+        "amount": stock.amount
+    }
