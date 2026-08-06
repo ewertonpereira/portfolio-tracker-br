@@ -68,3 +68,13 @@ def get_stock(ticker:str):
             'valor_total': round(amount * price, 2)
         }
 
+@app.delete('/portfolio/{ticker}')
+def remove_stock(ticker:str):
+    wallet = load_wallet('wallet.csv')
+
+    if ticker not in wallet:
+        return {'error': f'{ticker} não encontrado na carteira.'}
+
+    del wallet[ticker]
+    save_wallet(wallet, 'wallet.csv')
+    return {'message': f'{ticker} removido com sucesso!'} 
