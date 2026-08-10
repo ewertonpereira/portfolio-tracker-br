@@ -1,15 +1,16 @@
 import os
 from fastapi import FastAPI
-from main import load_wallet, save_wallet,  get_stock_price
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from crud import get_all_stocks, get_stock, add_stock, update_stock, delete_stock
+from main import get_stock_price
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 
 app = FastAPI()
 
-class Stock(BaseModel):
+class StockInput(BaseModel):
     ticker: str
     amount: int
 
@@ -18,81 +19,60 @@ class StockUpdate(BaseModel):
 
 @app.get('/portfolio')
 def get_portfolio():
-    wallet = load_wallet('wallet.csv')
+    stocks = get_all_stocks()
     result = []
     total = 0
 
-    for symbol, amount in wallet.items():
-        price = get_stock_price(symbol, TOKEN)
+    for stock in stocks:
+        price = get_stock_price(stock.ticker, TOKEN)
         if price is None:
             continue
-
-        value = amount * price
+        value = stock.amount * price
         total += value
         result.append({
-            'ticker':symbol,
-            'amount': amount,
+            'ticker': stock.ticker,
+            'amount': stock.amount,
             'price': price,
-            'total_value': round(value)
+            'total_value': round(value, 2)
         })
 
-    return {
-        'portfolio': result,
-        'total': round(total, 2)
-    }
-
-@app.post('/portfolio')
-def add_stock(stock: Stock):
-    wallet = load_wallet('wallet.csv')
-    if stock.ticker in wallet:
-        return {'error':f'{stock.ticker} já existe na carteira.'}
-
-    wallet[stock.ticker] = stock.amount
-    save_wallet(wallet, 'wallet.csv')
-
-    return {'message': f'{stock.ticker} adicionado com sucesso!'}
+    return {'portfolio': result, 'total': round(total, 2)}
 
 @app.get('/portfolio/{ticker}')
-def get_stock(ticker:str):
-    wallet = load_wallet('wallet.csv')
-  
-    amount = wallet.get(ticker)
-    if amount is None:
+def get_one_stock(ticker: str):
+    stock = get_stock(ticker)
+    if stock is None:
         return {'error': f'{ticker} não encontrado na carteira'}
-
     price = get_stock_price(ticker, TOKEN)
     if price is None:
         return {'error': f'Erro ao buscar preço de {ticker}'}
-
     return {
-            'ticker':ticker,
-            'quantidade': amount,
-            'preco': price,
-            'valor_total': round(amount * price, 2)
-        }
+        'ticker': stock.ticker,
+        'amount': stock.amount,
+        'price': price,
+        'total_value': round(stock.amount * price, 2)
+    }
 
-@app.delete('/portfolio/{ticker}')
-def remove_stock(ticker:str):
-    wallet = load_wallet('wallet.csv')
-
-    if ticker not in wallet:
-        return {'error': f'{ticker} não encontrado na carteira.'}
-
-    del wallet[ticker]
-    save_wallet(wallet, 'wallet.csv')
-    return {'message': f'{ticker} removido com sucesso!'}
+@app.post('/portfolio')
+def create_stock(stock: StockInput):
+    existing = get_stock(stock.ticker)
+    if existing:
+        return {'error': f'{stock.ticker} já existe na carteira'}
+    add_stock(stock.ticker, stock.amount)
+    return {'message': f'{stock.ticker} adicionado com sucesso!'}
 
 @app.put('/portfolio/{ticker}')
-def update_stock(ticker:str, stock: StockUpdate):
-    wallet = load_wallet('wallet.csv')
+def edit_stock(ticker: str, stock: StockUpdate):
+    existing = get_stock(ticker)
+    if existing is None:
+        return {'error': f'{ticker} não encontrado na carteira'}
+    update_stock(ticker, stock.amount)
+    return {'message': f'{ticker} atualizado com sucesso!', 'amount': stock.amount}
 
-    if ticker not in wallet:
-        return {"error": f"{ticker} não encontrado na carteira."}
-
-    wallet[ticker] = stock.amount
-    save_wallet(wallet, 'wallet.csv')
-
-    return {
-        "message": f"{ticker} atualizado com sucesso!",
-        "amount": stock.amount
-    }
+@app.delete('/portfolio/{ticker}')
+def remove_stock(ticker: str):
+    existing = get_stock(ticker)
+    if existing is None:
+        return {'error': f'{ticker} não encontrado na carteira'}
+    delete_stock(ticker)
+    return {'message': f'{ticker} removido com sucesso!'}
