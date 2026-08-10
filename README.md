@@ -6,13 +6,14 @@ from B3 and manages your investment portfolio.
 ## 🚀 Features
 - Full CRUD REST API with FastAPI
 - Real-time stock prices via brapi.dev
+- SQLite database with SQLAlchemy ORM
 - Secure token handling with environment variables
-- Portfolio data stored in CSV
 
 ## 🛠️ Technologies
 - Python 3
 - FastAPI
 - Uvicorn
+- SQLAlchemy
 - Requests
 - python-dotenv
 
@@ -25,13 +26,11 @@ from B3 and manages your investment portfolio.
 3. Create a `.env` file:
    TOKEN=your_brapi_token_here
 
-4. Edit `wallet.csv` with your stocks:
-   ticker,amount
-   PETR4,10
-   ITUB4,8
-
-5. Run the API:
+4. Run the API:
    uvicorn api:app --reload
+
+5. Access the auto-generated docs:
+   http://localhost:8000/docs
 
 ## 📡 Endpoints
 
@@ -44,14 +43,33 @@ from B3 and manages your investment portfolio.
 | DELETE | /portfolio/{ticker} | Removes a stock |
 
 ## 📊 Example response — GET /portfolio
+```json
 {
   "portfolio": [
     {
       "ticker": "PETR4",
-      "amount": 10,
-      "price": 37.64,
-      "total_value": 376.40
+      "amount": 132,
+      "price": 42.06,
+      "total_value": 5551.92
     }
   ],
-  "total": 376.40
+  "total": 5551.92
 }
+```
+
+## 🗂️ Project structure
+
+portfolio-tracker-br/
+├── api.py → FastAPI endpoints
+├── crud.py → database operations
+├── database.py → SQLAlchemy models and connection
+├── main.py → stock price fetching
+├── .env → token (not versioned)
+├── .gitignore
+├── requirements.txt
+└── README.md
+
+## 📌 Branches
+- `main` → v2 — SQLite + SQLAlchemy
+- `feature/database` → v2 development branch
+- Older CSV version available in git history
