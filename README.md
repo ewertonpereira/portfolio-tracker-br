@@ -59,15 +59,17 @@ from B3 and manages your investment portfolio.
 
 ## 🗂️ Project structure
 
+```
 portfolio-tracker-br/
-├── api.py → FastAPI endpoints
-├── crud.py → database operations
-├── database.py → SQLAlchemy models and connection
-├── main.py → stock price fetching
-├── .env → token (not versioned)
+├── api.py          → FastAPI endpoints
+├── crud.py         → database operations
+├── database.py     → SQLAlchemy models and connection
+├── main.py         → stock price fetching
+├── .env            → token (not versioned)
 ├── .gitignore
 ├── requirements.txt
 └── README.md
+```
 
 ## 📌 Branches
 - `main` → v2 — SQLite + SQLAlchemy
