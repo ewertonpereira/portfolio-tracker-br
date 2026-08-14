@@ -13,6 +13,13 @@ class Stock(Base):
     ticker = Column(String, unique=True, nullable=False)
     amount = Column(Integer, nullable=False)
 
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+
 Base.metadata.create_all(engine)
 
 def get_session():
